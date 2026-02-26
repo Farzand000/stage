@@ -79,16 +79,16 @@
 
 import streamlit as st
 import pandas as pd
-df=pd.read_csv("us.csv")
+df=pd.read_csv("US_mainline.csv")
 df["Created at"] = pd.to_datetime(df["Created at"], errors="coerce", utc=True)
 
 # Alleen timezone verwijderen als het echt timezone-aware is
-if df["Created at"].dt.tz is not None:
-    df["Created at"] = df["Created at"].dt.tz_localize(None)
+# if df["Created at"].dt.tz is not None:
+#     df["Created at"] = df["Created at"].dt.tz_localize(None)
 
-df["Jaar"] = df["Created at"].dt.year
-df["Maand"] = df["Created at"].dt.month
-df["Dag"] = df["Created at"].dt.day
+# df["Jaar"] = df["Created at"].dt.year
+# df["Maand"] = df["Created at"].dt.month
+# df["Dag"] = df["Created at"].dt.day
 # Voorbeeld data
 data = df
 
@@ -114,7 +114,7 @@ df_filtered = df[df["Jaar"].isin(gekozen_jaren)]
 # 🔹 Subtotaal per maand
 subtotaal = (
     df_filtered
-    .groupby("Maand")["Subtotal"]
+    .groupby("Lineitem name")["Subtotal"]
     .sum()
     .reset_index()
 )

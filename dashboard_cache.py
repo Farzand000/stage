@@ -5,7 +5,6 @@ import pgeocode
 import pydeck as pdk
 import calendar
 
-
 # LAND SELECTIE
 
 

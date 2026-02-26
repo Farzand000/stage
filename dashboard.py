@@ -30,12 +30,12 @@ land = st.sidebar.selectbox(
 )
 
 if land == "United States":
-    bestand = "us.csv"
+    bestand = "US_mainline.csv"
     country_code = "us"
     zoom_level = 4
     currency_symbol = "$"
 else:
-    bestand = "uk_cleaned.csv"
+    bestand = "UK_mainline.csv"
     country_code = "gb"
     zoom_level = 5
     currency_symbol = "£"
@@ -94,12 +94,27 @@ subtotaal = (
     .reset_index()
 )
 
-subtotaal["Maand"] = subtotaal["Maand"].apply(
+# Sorteer eerst op maandnummer
+subtotaal = subtotaal.sort_values("Maand")
+
+# Maak maandnaam kolom
+subtotaal["MaandNaam"] = subtotaal["Maand"].apply(
     lambda x: calendar.month_name[int(x)]
 )
 
+# Zet vaste kalender volgorde
+maand_volgorde = list(calendar.month_name)[1:]  # January → December
+
+subtotaal["MaandNaam"] = pd.Categorical(
+    subtotaal["MaandNaam"],
+    categories=maand_volgorde,
+    ordered=True
+)
+
+subtotaal = subtotaal.sort_values("MaandNaam")
+
 st.subheader(f"Subtotaal per maand - {land}")
-st.bar_chart(subtotaal.set_index("Maand"))
+st.bar_chart(subtotaal.set_index("MaandNaam")["Subtotal"])
 
 
 # ZIP DATA
