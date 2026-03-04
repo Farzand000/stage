@@ -8,10 +8,10 @@ import calendar
 st.set_page_config(layout="wide")
 
 # ------------------ DATA INLADEN ------------------
-
+files=["b2b_cleaned.csv"]
 @st.cache_data
 def load_data():
-    df = pd.read_csv("b2b_cleaned.csv")
+    df = pd.read_csv(files[0], encoding="utf-8")
     df.columns = df.columns.str.strip()
     return df
 
@@ -19,13 +19,13 @@ df = load_data()
 
 # ------------------ DATUM VERWERKEN ------------------
 
-df["Created At"] = pd.to_datetime(
-    df["Created At"], errors="coerce", utc=True
-).dt.tz_localize(None)
+# df["Created At"] = pd.to_datetime(
+#     df["Created At"], errors="coerce", utc=True
+# ).dt.tz_localize(None)
 
-df["Jaar"] = df["Created At"].dt.year
-df["Maand"] = df["Created At"].dt.month
-df["Subtotal"] = pd.to_numeric(df["Subtotal"], errors="coerce").fillna(0)
+# df["Jaar"] = df["Created At"].dt.year
+# df["Maand"] = df["Created At"].dt.month
+# df["Subtotal"] = pd.to_numeric(df["Subtotal"], errors="coerce").fillna(0)
 
 # ------------------ FILTERS ------------------
 
@@ -37,22 +37,22 @@ gekozen_land = st.sidebar.multiselect(
     default=sorted(df["Shipping Country"].dropna().unique())
 )
 
-gekozen_maanden = st.sidebar.multiselect(
-    "Selecteer maand(en)",
-    sorted(df["Maand"].dropna().unique()),
-    sorted(df["Maand"].dropna().unique())
-)
+# gekozen_maanden = st.sidebar.multiselect(
+#     "Selecteer maand(en)",
+#     sorted(df["Maand"].dropna().unique()),
+#     sorted(df["Maand"].dropna().unique())
+# )
 
-gekozen_jaren = st.sidebar.multiselect(
-    "Selecteer Jaar(en)",
-    sorted(df["Jaar"].dropna().unique()),
-    sorted(df["Jaar"].dropna().unique())
-)
+# gekozen_jaren = st.sidebar.multiselect(
+#     "Selecteer Jaar(en)",
+#     sorted(df["Jaar"].dropna().unique()),
+#     sorted(df["Jaar"].dropna().unique())
+# )
 
 df_filtered = df[
-    (df["Shipping Country"].isin(gekozen_land)) &
-    (df["Maand"].isin(gekozen_maanden)) &
-    (df["Jaar"].isin(gekozen_jaren))
+    (df["Shipping Country"].isin(gekozen_land)) 
+    # (df["Maand"].isin(gekozen_maanden)) &
+    # (df["Jaar"].isin(gekozen_jaren))
 ]
 
 if df_filtered.empty:
@@ -61,29 +61,68 @@ if df_filtered.empty:
 
 # ------------------ SUBTOTAAL PER MAAND ------------------
 
-subtotaal = (
-    df_filtered.groupby("Maand")["Subtotal"]
+# subtotaal = (
+#     df_filtered.groupby("Maand")["Subtotal"]
+#     .sum()
+#     .reset_index()
+#     .sort_values("Maand")
+# )
+
+# subtotaal["MaandNaam"] = subtotaal["Maand"].apply(
+#     lambda x: calendar.month_name[int(x)]
+# )
+
+# maand_volgorde = list(calendar.month_name)[1:]
+
+# subtotaal["MaandNaam"] = pd.Categorical(
+#     subtotaal["MaandNaam"],
+#     categories=maand_volgorde,
+#     ordered=True
+# )
+
+# subtotaal = subtotaal.sort_values("MaandNaam")
+
+# st.subheader("Subtotaal per maand")
+# st.bar_chart(subtotaal.set_index("MaandNaam")["Subtotal"])
+
+
+
+# ------------------ TOTALE VERKOOP ------------------
+
+totale_verkoop = df_filtered["Subtotal"].sum()
+
+st.markdown("## Totale verkoop AW26 B2B")
+
+st.metric(
+    label="Totale omzet",
+    value=f"€ {totale_verkoop:,.0f}"
+)
+
+if df_filtered.empty:
+    st.warning("Geen data voor gekozen filters.")
+    st.stop()
+
+    # ------------------ OMZET PER LAND ------------------
+
+land_omzet = (
+    df_filtered
+    .groupby("Shipping Country")["Subtotal"]
     .sum()
     .reset_index()
-    .sort_values("Maand")
+    .sort_values("Subtotal", ascending=False)
 )
 
-subtotaal["MaandNaam"] = subtotaal["Maand"].apply(
-    lambda x: calendar.month_name[int(x)]
+land_omzet = land_omzet.rename(columns={
+    "Shipping Country": "Land",
+    "Subtotal": "Totale omzet (€)"
+})
+
+st.subheader("Omzet per land")
+
+st.dataframe(
+    land_omzet,
+    use_container_width=True
 )
-
-maand_volgorde = list(calendar.month_name)[1:]
-
-subtotaal["MaandNaam"] = pd.Categorical(
-    subtotaal["MaandNaam"],
-    categories=maand_volgorde,
-    ordered=True
-)
-
-subtotaal = subtotaal.sort_values("MaandNaam")
-
-st.subheader("Subtotaal per maand")
-st.bar_chart(subtotaal.set_index("MaandNaam")["Subtotal"])
 
 # ------------------ ZIP DATA + BEDRIJF ------------------
 
@@ -100,7 +139,6 @@ zip_data["Shipping Zip"] = (
     zip_data["Shipping Zip"]
     .astype(str)
     .str.strip()
-    .str.split("-").str[0]
 )
 
 # ------------------ GEOCODING ------------------
