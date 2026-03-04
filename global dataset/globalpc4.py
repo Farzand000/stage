@@ -1,43 +1,20 @@
-# import streamlit as st
-# import pandas as pd
-# import numpy as np
-# import pgeocode
-# import pydeck as pdk
-# import calendar
-
-# st.set_page_config(layout="wide")
-
-# data_path=("C:\Users\farza\OneDrive\Documents\ADS&AI\Jaar 2\stage\global dataset")
-
-
-# # ------------------ DATA INLADEN ------------------
-
-# @st.cache_data
-# def load_data():
-#     return pd.read_csv("global_mainline_pc4.csv")
-
-# df = load_data()
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pgeocode
 import pydeck as pdk
 import calendar
-from pathlib import Path
 
-# ------------------ PAD DEFINIËREN ------------------
-data_path = Path(r"C:\Users\farza\OneDrive\Documents\ADS&AI\Jaar 2\stage\global dataset")
+st.set_page_config(layout="wide")
 
 # ------------------ DATA INLADEN ------------------
+
 @st.cache_data
 def load_data():
-    return pd.read_csv(data_path / "global_mainline_pc4.csv")
+    return pd.read_csv("global_mainline_pc4.csv")
 
 df = load_data()
 
-#st.write(df.head())
 # ------------------ DATUM VERWERKEN ------------------
 
 df["Created at"] = pd.to_datetime(df["Created at"], errors="coerce", utc=True).dt.tz_localize(None)
