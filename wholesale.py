@@ -4,6 +4,44 @@ import numpy as np
 import pgeocode
 import pydeck as pdk
 
+# ------------------ LAND NAMEN ------------------
+
+country_names = {
+    "PL": "Poland",
+    "US": "United States",
+    "GB": "United Kingdom",
+    "FR": "France",
+    "DE": "Germany",
+    "IT": "Italy",
+    "ES": "Spain",
+    "PT": "Portugal",
+    "CA": "Canada",
+    "BR": "Brazil",
+    "AU": "Australia",
+    "JP": "Japan",
+    "SG": "Singapore",
+    "AE": "United Arab Emirates",
+    "BE": "Belgium",
+    "DK": "Denmark",
+    "FI": "Finland",
+    "NO": "Norway",
+    "CZ": "Czech Republic",
+    "LV": "Latvia",
+    "GR": "Greece",
+    "MT": "Malta",
+    "ZA": "South Africa",
+    "IN": "India",
+    "MY": "Malaysia",
+    "TH": "Thailand",
+    "CN": "China",
+    "ID": "Indonesia",
+    "UA": "Ukraine",
+    "CL": "Chile",
+    "GT": "Guatemala",
+    "KR": "South Korea",
+    "PH": "Philippines"
+}
+
 st.set_page_config(layout="wide")
 
 # ------------------ DATA INLADEN ------------------
@@ -124,7 +162,6 @@ zip_data.loc[mask_pl, "Shipping Zip"] = (
     .astype(str)
     .str.replace(r"(\d{2})(\d{3})", r"\1-\2", regex=True)
 )
-
 # ------------------ GEOCODING ------------------
 
 @st.cache_data(show_spinner="Geocoding postcodes...")
@@ -301,7 +338,9 @@ st.dataframe(
 
 totaal_land = df_land["Subtotal"].sum()
 
+land_naam = country_names.get(gekozen_land, gekozen_land)
+
 st.metric(
-    f"Totaal omzet {gekozen_land}",
+    f"Totaal omzet {land_naam}",
     f"€ {totaal_land:,.2f}"
 )
