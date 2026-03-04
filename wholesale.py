@@ -114,6 +114,17 @@ zip_data["Shipping Zip"] = (
     .str.replace("-", "")
 )
 
+
+# ------------------ POLEN POSTCODE FIX ------------------
+
+mask_pl = zip_data["Shipping Country"] == "PL"
+
+zip_data.loc[mask_pl, "Shipping Zip"] = (
+    zip_data.loc[mask_pl, "Shipping Zip"]
+    .astype(str)
+    .str.replace(r"(\d{2})(\d{3})", r"\1-\2", regex=True)
+)
+
 # ------------------ GEOCODING ------------------
 
 @st.cache_data(show_spinner="Geocoding postcodes...")
